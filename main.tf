@@ -51,7 +51,8 @@ resource "aws_lambda_function" "my_lambda" {
   # Package the Lambda code as a zip file
   filename         = "lambda.zip"
   source_code_hash = filebase64sha256("lambda.zip")
-
+  depends_on = [null_resource.build_lambda, aws_iam_role_policy_attachment.lambda_basic_execution]
+  
   # Environment Variables (Optional)
   environment {
     variables = {
