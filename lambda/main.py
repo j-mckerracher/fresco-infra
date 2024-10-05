@@ -1,5 +1,8 @@
-def print_hello():
-    print("hello")
+# main.py
 
-print_hello()
+def lambda_handler(event, context):
+    return {
+        'statusCode': 200,
+        'body': 'Hello from Lambda!'
+    }
 
