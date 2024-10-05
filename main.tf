@@ -43,15 +43,15 @@ resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
 resource "aws_lambda_function" "my_lambda" {
   function_name = "my_lambda_function"
 
-  handler = "index.handler"
-  runtime = "Python 3.12" 
+  handler = "main.lambda_handler" # Change handler to match Python function
+  runtime = "python3.12"          # Correct Python runtime
 
   role = aws_iam_role.lambda_exec_role.arn
 
   # Package the Lambda code as a zip file
   filename         = "lambda.zip"
   source_code_hash = filebase64sha256("lambda.zip")
-  depends_on = [null_resource.build_lambda, aws_iam_role_policy_attachment.lambda_basic_execution]
+  depends_on       = [null_resource.build_lambda, aws_iam_role_policy_attachment.lambda_basic_execution]
   
   # Environment Variables (Optional)
   environment {
@@ -75,8 +75,6 @@ resource "null_resource" "build_lambda" {
   }
 
   provisioner "local-exec" {
-    command = "zip -j ${path.module}/lambda.zip ${path.module}/lambda/index.js"
+    command = "zip -j ${path.module}/lambda.zip ${path.module}/lambda/main.py"  # Updated to zip main.py
   }
 }
-
-
