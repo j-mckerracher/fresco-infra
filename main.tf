@@ -44,7 +44,7 @@ resource "aws_lambda_function" "my_lambda" {
   function_name = "my_lambda_function"
 
   handler = "main.lambda_handler" # Change handler to match Python function
-  runtime = "python3.12"          # Correct Python runtime
+  runtime = "python3.9"
 
   role = aws_iam_role.lambda_exec_role.arn
 
