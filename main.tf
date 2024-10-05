@@ -79,8 +79,4 @@ resource "null_resource" "build_lambda" {
   }
 }
 
-# Add dependency to ensure the ZIP is created first
-resource "aws_lambda_function" "my_lambda" {
-  depends_on = [null_resource.build_lambda, aws_iam_role_policy_attachment.lambda_basic_execution]
-}
 
