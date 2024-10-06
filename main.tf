@@ -51,30 +51,13 @@ resource "aws_lambda_function" "my_lambda" {
   # Package the Lambda code as a zip file
   filename         = "lambda.zip"
   source_code_hash = filebase64sha256("lambda.zip")
-  depends_on       = [null_resource.build_lambda, aws_iam_role_policy_attachment.lambda_basic_execution]
+  depends_on       = [aws_iam_role_policy_attachment.lambda_basic_execution]
   
   # Environment Variables (Optional)
   environment {
     variables = {
-      ENV = "production"
+      ENV = "test"
     }
   }
 }
 
-# Create a ZIP archive of the Lambda function code
-data "archive_file" "lambda_zip" {
-  type        = "zip"
-  source_dir  = "${path.module}/lambda"
-  output_path = "${path.module}/lambda.zip"
-}
-
-# Ensure the Lambda ZIP is created before the Lambda Function is deployed
-resource "null_resource" "build_lambda" {
-  triggers = {
-    always_run = "${timestamp()}"
-  }
-
-  provisioner "local-exec" {
-    command = "zip -j ${path.module}/lambda.zip ${path.module}/lambda/main.py"  # Updated to zip main.py
-  }
-}
