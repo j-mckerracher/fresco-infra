@@ -148,11 +148,11 @@ resource "aws_amplify_app" "fresco_amplify_app" {
   # repository = "https://github.com/repo/example"
   # oauth_token = var.oauth_token
 
-  environment_variables = {
-    DB_HOST     = aws_db_instance.postgres.address
-    DB_NAME     = aws_db_instance.postgres.name
-    DB_USER     = var.db_username
-    DB_PASSWORD = var.db_password
-    DB_PORT     = aws_db_instance.postgres.port
-  }
+#   environment_variables = {
+#     DB_HOST     = aws_db_instance.postgres.address
+#     DB_NAME     = aws_db_instance.postgres.name
+#     DB_USER     = var.db_username
+#     DB_PASSWORD = var.db_password
+#     DB_PORT     = aws_db_instance.postgres.port
+#   }
 }
