@@ -3,45 +3,46 @@ provider "aws" {
 }
 
 # Variables for sensitive data
-# variable "db_username" {
-#   description = "Username for the database"
-#   type        = string
-# }
-#
-# variable "db_password" {
-#   description = "Password for the database"
-#   type        = string
-#   sensitive   = true
-# }
+variable "db_username" {
+  description = "Username for the database"
+  type        = string
+}
+
+variable "db_password" {
+  description = "Password for the database"
+  type        = string
+  sensitive   = true
+}
 
 # Create a VPC
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
-
-  tags = {
-    Name = "main-vpc"
-  }
 }
 
-# Create a public subnet
-resource "aws_subnet" "public" {
+# Data source to get available AZs
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
+# Create public subnets in two different AZs
+resource "aws_subnet" "public1" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.1.0/24"
-  availability_zone = "us-east-1a" # Replace with your availability zone
+  availability_zone       = data.aws_availability_zones.available.names[0]
   map_public_ip_on_launch = true
+}
 
-  tags = {
-    Name = "public-subnet"
-  }
+resource "aws_subnet" "public2" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.2.0/24"
+  availability_zone       = data.aws_availability_zones.available.names[1]
+  map_public_ip_on_launch = true
 }
 
 # Create an Internet Gateway
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
 
-  tags = {
-    Name = "main-igw"
-  }
 }
 
 # Create a public route table
@@ -52,18 +53,20 @@ resource "aws_route_table" "public" {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
   }
-
-  tags = {
-    Name = "public-route-table"
-  }
 }
 
-# Associate the route table with the public subnet
-resource "aws_route_table_association" "public" {
-  subnet_id      = aws_subnet.public.id
+# Associate the route table with the public subnets
+resource "aws_route_table_association" "public1" {
+  subnet_id      = aws_subnet.public1.id
   route_table_id = aws_route_table.public.id
 }
 
+resource "aws_route_table_association" "public2" {
+  subnet_id      = aws_subnet.public2.id
+  route_table_id = aws_route_table.public.id
+}
+
+# Security Group for the RDS instance
 resource "aws_security_group" "db_sg" {
   name        = "db-security-group"
   description = "Allow database access"
@@ -73,10 +76,7 @@ resource "aws_security_group" "db_sg" {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    cidr_blocks = [
-      "0.0.0.0/0", # Replace with AWS IP ranges
-      # Add additional IP ranges as needed
-    ]
+    cidr_blocks = ["0.0.0.0/0"] # Replace with specific IP ranges for security
   }
 
   egress {
@@ -85,23 +85,18 @@ resource "aws_security_group" "db_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
-  tags = {
-    Name = "db-security-group"
-  }
 }
-
 
 # Create a DB subnet group
 resource "aws_db_subnet_group" "db_subnet_group" {
   name       = "db-subnet-group"
-  subnet_ids = [aws_subnet.public.id]
-
-  tags = {
-    Name = "db-subnet-group"
-  }
+  subnet_ids = [
+    aws_subnet.public1.id,
+    aws_subnet.public2.id
+  ]
 }
 
+# Create a DB parameter group to enforce SSL
 resource "aws_db_parameter_group" "postgresql" {
   name        = "postgresql-parameter-group"
   family      = "postgres13"
@@ -113,6 +108,7 @@ resource "aws_db_parameter_group" "postgresql" {
   }
 }
 
+# Create a KMS key for RDS encryption
 resource "aws_kms_key" "rds" {
   description = "KMS key for RDS encryption"
 }
@@ -124,28 +120,26 @@ resource "aws_db_instance" "postgres" {
   engine                 = "postgres"
   engine_version         = "13.4"
   instance_class         = "db.t3.micro"
-  username               = "admin-user"
-  password               = "1234"
+  name                   = "mydatabase"
+  username               = var.db_username
+  password               = var.db_password
   parameter_group_name   = aws_db_parameter_group.postgresql.name
   db_subnet_group_name   = aws_db_subnet_group.db_subnet_group.name
   vpc_security_group_ids = [aws_security_group.db_sg.id]
-  publicly_accessible = true # Set to false for prod
+  publicly_accessible    = true # Set to false for production
   storage_encrypted      = true
   kms_key_id             = aws_kms_key.rds.arn
+  multi_az               = true
 
   skip_final_snapshot = true
-
-  tags = {
-    Name = "postgres-db"
-  }
 }
 
 # Create the Amplify app
-resource "aws_amplify_app" "fresco_amplify_app" {
+resource "aws_amplify_app" "amplify_app" {
   name = "fresco"
 
   # Optional: Connect a repository
-  # repository = "https://github.com/repo/example"
+  # repository = "https://github.com/your-repo/example"
   # oauth_token = var.oauth_token
 
 #   environment_variables = {
