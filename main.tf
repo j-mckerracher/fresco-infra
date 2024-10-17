@@ -6,12 +6,14 @@ provider "aws" {
 variable "db_username" {
   description = "Username for the database"
   type        = string
+  default     = "user"
 }
 
 variable "db_password" {
   description = "Password for the database"
   type        = string
   sensitive   = true
+  default     = ""
 }
 
 # Create a VPC with DNS support and hostnames enabled
@@ -121,8 +123,8 @@ resource "aws_db_instance" "postgres" {
   engine                 = "postgres"
   engine_version         = "13.4"
   instance_class         = "db.t3.micro"
-  username               = "user"
-  password               = ""
+  username               = var.db_username
+  password               = var.db_password
   parameter_group_name   = aws_db_parameter_group.postgresql.name
   db_subnet_group_name   = aws_db_subnet_group.db_subnet_group.name
   vpc_security_group_ids = [aws_security_group.db_sg.id]
