@@ -6,7 +6,7 @@ provider "aws" {
 variable "db_username" {
   description = "Username for the database"
   type        = string
-  default     = "user"
+  default     = "kDj3jXr5zJjskYavXmGX7H"
 }
 
 variable "db_password" {
