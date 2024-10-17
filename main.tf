@@ -147,7 +147,7 @@ resource "aws_amplify_app" "amplify_app" {
   # Set environment variables for database connection
   environment_variables = {
     DB_HOST     = aws_db_instance.postgres.address
-    DB_NAME     = aws_db_instance.postgres.name
+    DB_NAME     = "fresco"
     DB_USER     = var.db_username
     DB_PASSWORD = var.db_password
     DB_PORT     = aws_db_instance.postgres.port
