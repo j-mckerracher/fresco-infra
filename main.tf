@@ -102,7 +102,7 @@ resource "aws_db_subnet_group" "db_subnet_group" {
 # Create a DB parameter group to enforce SSL
 resource "aws_db_parameter_group" "postgresql" {
   name        = "postgresql-parameter-group"
-  family      = "postgres13"
+  family      = "postgres16"
   description = "Custom PostgreSQL parameter group"
 
   parameter {
