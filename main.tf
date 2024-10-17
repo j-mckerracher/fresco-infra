@@ -3,20 +3,22 @@ provider "aws" {
 }
 
 # Variables for sensitive data
-# variable "db_username" {
-#   description = "Username for the database"
-#   type        = string
-# }
-#
-# variable "db_password" {
-#   description = "Password for the database"
-#   type        = string
-#   sensitive   = true
-# }
+variable "db_username" {
+  description = "Username for the database"
+  type        = string
+}
 
-# Create a VPC
+variable "db_password" {
+  description = "Password for the database"
+  type        = string
+  sensitive   = true
+}
+
+# Create a VPC with DNS support and hostnames enabled
 resource "aws_vpc" "main" {
-  cidr_block = "10.0.0.0/16"
+  cidr_block           = "10.0.0.0/16"
+  enable_dns_support   = true
+  enable_dns_hostnames = true
 }
 
 # Data source to get available AZs
@@ -42,7 +44,6 @@ resource "aws_subnet" "public2" {
 # Create an Internet Gateway
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
-
 }
 
 # Create a public route table
@@ -141,11 +142,12 @@ resource "aws_amplify_app" "amplify_app" {
   # repository = "https://github.com/your-repo/example"
   # oauth_token = var.oauth_token
 
-#   environment_variables = {
-#     DB_HOST     = aws_db_instance.postgres.address
-#     DB_NAME     = aws_db_instance.postgres.name
-#     DB_USER     = var.db_username
-#     DB_PASSWORD = var.db_password
-#     DB_PORT     = aws_db_instance.postgres.port
-#   }
+  # Set environment variables for database connection
+  environment_variables = {
+    DB_HOST     = aws_db_instance.postgres.address
+    DB_NAME     = aws_db_instance.postgres.name
+    DB_USER     = var.db_username
+    DB_PASSWORD = var.db_password
+    DB_PORT     = aws_db_instance.postgres.port
+  }
 }
