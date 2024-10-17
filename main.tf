@@ -13,7 +13,7 @@ variable "db_password" {
   description = "Password for the database"
   type        = string
   sensitive   = true
-  default     = ""
+  default     = "bH3F&NUA%TYexnaMxGDws$"
 }
 
 # Create a VPC with DNS support and hostnames enabled
