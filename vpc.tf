@@ -5,11 +5,6 @@ resource "aws_vpc" "main" {
   enable_dns_hostnames = true
 }
 
-# Data source to get available AZs
-data "aws_availability_zones" "available" {
-  state = "available"
-}
-
 # Variables to control subnet creation (defined in variables.tf)
 # variable "use_existing_private_subnets" { ... }
 # variable "existing_private_subnet_ids" { ... }
@@ -38,12 +33,6 @@ resource "aws_subnet" "private" {
   tags = {
     Name = "private-subnet-${count.index + 1}"
   }
-}
-
-# Data source for existing private subnets
-data "aws_subnet" "existing_private_subnets" {
-  count = var.use_existing_private_subnets ? length(var.existing_private_subnet_ids) : 0
-  id    = var.existing_private_subnet_ids[count.index]
 }
 
 # Local variable to get private subnet IDs
