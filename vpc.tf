@@ -5,34 +5,50 @@ resource "aws_vpc" "main" {
   enable_dns_hostnames = true
 }
 
+# Data source to get available AZs
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
+# Variables to control subnet creation (defined in variables.tf)
+# variable "use_existing_private_subnets" { ... }
+# variable "existing_private_subnet_ids" { ... }
+
 # Create public subnets in two different AZs
-resource "aws_subnet" "public1" {
+resource "aws_subnet" "public" {
+  count                   = 2
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.0.1.0/24"
-  availability_zone       = data.aws_availability_zones.available.names[0]
+  cidr_block              = cidrsubnet(aws_vpc.main.cidr_block, 8, count.index + 1)
+  availability_zone       = data.aws_availability_zones.available.names[count.index]
   map_public_ip_on_launch = true
+
+  tags = {
+    Name = "public-subnet-${count.index + 1}"
+  }
 }
 
-resource "aws_subnet" "public2" {
-  vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.0.2.0/24"
-  availability_zone       = data.aws_availability_zones.available.names[1]
-  map_public_ip_on_launch = true
-}
-
-# Create private subnets for Lambda function
-resource "aws_subnet" "private1" {
-  vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.0.3.0/24"
-  availability_zone       = data.aws_availability_zones.available.names[0]
+# Conditionally create private subnets or use existing ones
+resource "aws_subnet" "private" {
+  count             = var.use_existing_private_subnets ? 0 : 2
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = cidrsubnet(aws_vpc.main.cidr_block, 8, count.index + 3)
+  availability_zone = data.aws_availability_zones.available.names[count.index]
   map_public_ip_on_launch = false
+
+  tags = {
+    Name = "private-subnet-${count.index + 1}"
+  }
 }
 
-resource "aws_subnet" "private2" {
-  vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.0.4.0/24"
-  availability_zone       = data.aws_availability_zones.available.names[1]
-  map_public_ip_on_launch = false
+# Data source for existing private subnets
+data "aws_subnet" "existing_private_subnets" {
+  count = var.use_existing_private_subnets ? length(var.existing_private_subnet_ids) : 0
+  id    = var.existing_private_subnet_ids[count.index]
+}
+
+# Local variable to get private subnet IDs
+locals {
+  private_subnet_ids = var.use_existing_private_subnets ? var.existing_private_subnet_ids : aws_subnet.private[*].id
 }
 
 # Create an Internet Gateway
@@ -51,24 +67,20 @@ resource "aws_route_table" "public" {
 }
 
 # Associate the route table with the public subnets
-resource "aws_route_table_association" "public1" {
-  subnet_id      = aws_subnet.public1.id
-  route_table_id = aws_route_table.public.id
-}
-
-resource "aws_route_table_association" "public2" {
-  subnet_id      = aws_subnet.public2.id
+resource "aws_route_table_association" "public" {
+  count          = length(aws_subnet.public)
+  subnet_id      = aws_subnet.public[count.index].id
   route_table_id = aws_route_table.public.id
 }
 
 # Create NAT Gateway for private subnets
 resource "aws_eip" "nat" {
-  vpc = true
+  domain = "vpc"
 }
 
 resource "aws_nat_gateway" "nat" {
   allocation_id = aws_eip.nat.id
-  subnet_id     = aws_subnet.public1.id
+  subnet_id     = aws_subnet.public[0].id
 }
 
 # Create private route table
@@ -82,12 +94,8 @@ resource "aws_route_table" "private" {
 }
 
 # Associate the route table with the private subnets
-resource "aws_route_table_association" "private1" {
-  subnet_id      = aws_subnet.private1.id
-  route_table_id = aws_route_table.private.id
-}
-
-resource "aws_route_table_association" "private2" {
-  subnet_id      = aws_subnet.private2.id
+resource "aws_route_table_association" "private" {
+  count          = length(local.private_subnet_ids)
+  subnet_id      = local.private_subnet_ids[count.index]
   route_table_id = aws_route_table.private.id
 }

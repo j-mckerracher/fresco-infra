@@ -36,10 +36,11 @@ resource "aws_lambda_permission" "apigw_http_permission" {
 
 # Create the WebSocket API
 resource "aws_apigatewayv2_api" "websocket_api" {
-  name                      = "data_streaming_websocket_api"
-  protocol_type             = "WEBSOCKET"
-  route_selection_expression = "$$request.body.action"
+  name                       = "data_streaming_websocket_api"
+  protocol_type              = "WEBSOCKET"
+  route_selection_expression = format("$%s", "request.body.action")
 }
+
 
 # Routes for $connect and $disconnect
 resource "aws_apigatewayv2_route" "connect_route" {

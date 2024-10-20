@@ -35,3 +35,16 @@ variable "jwt_issuer" {
   type        = string
   default     = "my-local-test-app"
 }
+
+variable "use_existing_private_subnets" {
+  description = "Boolean to determine whether to use existing private subnets or create new ones"
+  type        = bool
+  default     = false
+}
+
+variable "existing_private_subnet_ids" {
+  description = "List of existing private subnet IDs to use"
+  type        = list(string)
+  default     = []
+}
+
