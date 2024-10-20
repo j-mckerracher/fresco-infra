@@ -18,7 +18,7 @@ resource "aws_apigatewayv2_route" "http_route" {
   target    = "integrations/${aws_apigatewayv2_integration.http_integration.id}"
 }
 
-# Deployment
+# Deployment Stage for HTTP API
 resource "aws_apigatewayv2_stage" "http_stage" {
   api_id      = aws_apigatewayv2_api.http_api.id
   name        = "prod"
@@ -38,7 +38,7 @@ resource "aws_lambda_permission" "apigw_http_permission" {
 resource "aws_apigatewayv2_api" "websocket_api" {
   name          = "data_streaming_websocket_api"
   protocol_type = "WEBSOCKET"
-  route_selection_expression = "\$request.body.action"
+  route_selection_expression = "$request.body.action"
 }
 
 # Routes for $connect and $disconnect
@@ -52,9 +52,19 @@ resource "aws_apigatewayv2_route" "disconnect_route" {
   route_key = "$disconnect"
 }
 
-# Deployment
+# Deployment Stage for WebSocket API
 resource "aws_apigatewayv2_stage" "websocket_stage" {
   api_id      = aws_apigatewayv2_api.websocket_api.id
   name        = "prod"
   auto_deploy = true
+}
+
+# Output WebSocket API Endpoint URL
+output "websocket_api_endpoint" {
+  value = aws_apigatewayv2_stage.websocket_stage.invoke_url
+}
+
+# Output HTTP API Endpoint URL
+output "http_api_endpoint" {
+  value = aws_apigatewayv2_stage.http_stage.invoke_url
 }

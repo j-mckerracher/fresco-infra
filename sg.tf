@@ -30,7 +30,7 @@ resource "aws_security_group" "lambda_sg" {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    cidr_blocks = [aws_db_instance.postgres.address + "/32"]
+    cidr_blocks = ["10.0.0.0/16"] # Restrict to VPC CIDR
   }
 
   # Allow all outbound traffic (for accessing APIs, etc.)
@@ -40,14 +40,4 @@ resource "aws_security_group" "lambda_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-}
-
-# Update Security Group for RDS to allow inbound traffic from Lambda
-resource "aws_security_group_rule" "allow_lambda_to_db" {
-  type                     = "ingress"
-  from_port                = 5432
-  to_port                  = 5432
-  protocol                 = "tcp"
-  security_group_id        = aws_security_group.db_sg.id
-  source_security_group_id = aws_security_group.lambda_sg.id
 }

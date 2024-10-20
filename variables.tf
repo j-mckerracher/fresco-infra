@@ -1,8 +1,9 @@
-provider "aws" {
-  region = "us-east-1"
+variable "aws_region" {
+  description = "AWS region"
+  type        = string
+  default     = "us-east-1"
 }
 
-# Variables for sensitive data
 variable "db_username" {
   description = "Username for the database"
   type        = string
@@ -33,10 +34,4 @@ variable "jwt_issuer" {
   description = "Issuer for JWT tokens"
   type        = string
   default     = "my-local-test-app"
-}
-
-variable "aws_region" {
-  description = "AWS region"
-  type        = string
-  default     = "us-east-1"
 }

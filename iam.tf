@@ -1,3 +1,6 @@
+# Data source to get the AWS account ID
+data "aws_caller_identity" "current" {}
+
 # IAM Role for Lambda Function
 resource "aws_iam_role" "lambda_role" {
   name = "lambda_execution_role"
