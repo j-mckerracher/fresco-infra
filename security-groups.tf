@@ -8,7 +8,7 @@ resource "aws_security_group" "db_sg" {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # Replace with specific IP ranges for security
+    cidr_blocks = ["10.0.0.0/16"]  # Restrict to VPC CIDR
   }
 
   egress {
@@ -25,19 +25,21 @@ resource "aws_security_group" "lambda_sg" {
   description = "Security group for Lambda function"
   vpc_id      = aws_vpc.main.id
 
-  # Allow outbound access to the database
-  egress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"] # Restrict to VPC CIDR
-  }
-
-  # Allow all outbound traffic (for accessing APIs, etc.)
+  # Allow all outbound traffic (default behavior)
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+}
+
+# Allow Lambda to access RDS
+resource "aws_security_group_rule" "allow_lambda_to_db" {
+  type                     = "egress"
+  from_port                = 5432
+  to_port                  = 5432
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.lambda_sg.id
+  source_security_group_id = aws_security_group.db_sg.id
 }
