@@ -3,7 +3,7 @@ resource "aws_lambda_function" "data_streaming_function" {
   handler       = "lambda_function.lambda_handler"
   runtime       = "python3.12"
   role          = aws_iam_role.lambda_role.arn
-  timeout       = 900  # Maximum allowed timeout for Lambda
+  timeout       = 900
 
   filename         = "server.zip"
   source_code_hash = filebase64sha256("server.zip")
@@ -11,7 +11,7 @@ resource "aws_lambda_function" "data_streaming_function" {
   # Environment variables for the Lambda function
   environment {
     variables = {
-      AWS_REGION       = var.aws_region
+      REGION           = var.aws_region
       DB_HOST          = aws_db_instance.postgres.address
       DB_PORT          = aws_db_instance.postgres.port
       DB_NAME          = var.db_name
