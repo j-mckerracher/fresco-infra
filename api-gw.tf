@@ -38,7 +38,7 @@ resource "aws_lambda_permission" "apigw_http_permission" {
 resource "aws_apigatewayv2_api" "websocket_api" {
   name                      = "data_streaming_websocket_api"
   protocol_type             = "WEBSOCKET"
-  route_selection_expression = '$request.body.action'
+  route_selection_expression = "$$request.body.action"
 }
 
 # Routes for $connect and $disconnect
@@ -58,6 +58,3 @@ resource "aws_apigatewayv2_stage" "websocket_stage" {
   name        = "prod"
   auto_deploy = true
 }
-
-# Permission for API Gateway to invoke Lambda (if needed)
-# If you have Lambda functions associated with $connect or $disconnect, add permissions accordingly

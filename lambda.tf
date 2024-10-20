@@ -6,7 +6,7 @@ resource "aws_lambda_function" "data_streaming_function" {
   timeout       = 900  # Maximum allowed timeout for Lambda
 
   filename         = "server.zip"
-  source_code_hash = filebase64sha256("lambda_function.zip")
+  source_code_hash = filebase64sha256("server.zip")
 
   # Environment variables for the Lambda function
   environment {
