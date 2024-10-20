@@ -27,7 +27,7 @@ resource "aws_lambda_function" "data_streaming_function" {
 
   # VPC Configuration
   vpc_config {
-    subnet_ids         = [aws_subnet.private1.id, aws_subnet.private2.id]
+    subnet_ids         = local.private_subnet_ids
     security_group_ids = [aws_security_group.lambda_sg.id]
   }
 
