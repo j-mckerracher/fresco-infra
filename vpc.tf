@@ -5,11 +5,6 @@ resource "aws_vpc" "main" {
   enable_dns_hostnames = true
 }
 
-# Data source to get available AZs
-data "aws_availability_zones" "available" {
-  state = "available"
-}
-
 # Create public subnets in two different AZs
 resource "aws_subnet" "public1" {
   vpc_id                  = aws_vpc.main.id
