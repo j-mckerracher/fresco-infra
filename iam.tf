@@ -31,7 +31,7 @@ data "aws_iam_policy_document" "lambda_policy" {
       "logs:CreateLogStream",
       "logs:PutLogEvents"
     ]
-    resources = ["arn:aws:logs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:*"]
+    resources = ["arn:aws:logs:*:*:*"]
   }
 
   # Allow Lambda to connect to VPC resources
@@ -42,6 +42,16 @@ data "aws_iam_policy_document" "lambda_policy" {
       "ec2:DeleteNetworkInterface"
     ]
     resources = ["*"]
+  }
+
+  # Allow Lambda to use the API Gateway Management API
+  statement {
+    actions = [
+      "execute-api:ManageConnections"
+    ]
+    resources = [
+      "arn:aws:execute-api:${var.aws_region}:*:${aws_apigatewayv2_api.websocket_api.id}/*"
+    ]
   }
 }
 

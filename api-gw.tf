@@ -42,20 +42,64 @@ resource "aws_apigatewayv2_api" "websocket_api" {
 }
 
 
-# Routes for $connect and $disconnect
+# Routes for $connect, $disconnect, and $default
+## $connect Route
 resource "aws_apigatewayv2_route" "connect_route" {
-  api_id    = aws_apigatewayv2_api.websocket_api.id
-  route_key = "$connect"
+  api_id           = aws_apigatewayv2_api.websocket_api.id
+  route_key        = "$connect"
+  target           = "integrations/${aws_apigatewayv2_integration.connect_integration.id}"
+  api_key_required = false
 }
 
+## $disconnect Route
 resource "aws_apigatewayv2_route" "disconnect_route" {
-  api_id    = aws_apigatewayv2_api.websocket_api.id
-  route_key = "$disconnect"
+  api_id           = aws_apigatewayv2_api.websocket_api.id
+  route_key        = "$disconnect"
+  target           = "integrations/${aws_apigatewayv2_integration.disconnect_integration.id}"
+  api_key_required = false
 }
+
+## $default Route (handles messages with an 'action' field)
+resource "aws_apigatewayv2_route" "default_route" {
+  api_id           = aws_apigatewayv2_api.websocket_api.id
+  route_key        = "$default"
+  target           = "integrations/${aws_apigatewayv2_integration.default_integration.id}"
+  api_key_required = false
+}
+
 
 # Deployment Stage for WebSocket API
 resource "aws_apigatewayv2_stage" "websocket_stage" {
   api_id      = aws_apigatewayv2_api.websocket_api.id
   name        = "prod"
   auto_deploy = true
+}
+
+
+# Create Integrations for Routes
+## Integration for $connect
+resource "aws_apigatewayv2_integration" "connect_integration" {
+  api_id                 = aws_apigatewayv2_api.websocket_api.id
+  integration_type       = "AWS_PROXY"
+  integration_uri        = aws_lambda_function.data_streaming_function.invoke_arn
+  integration_method     = "POST"
+  payload_format_version = "2.0"
+}
+
+## Integration for $disconnect
+resource "aws_apigatewayv2_integration" "disconnect_integration" {
+  api_id                 = aws_apigatewayv2_api.websocket_api.id
+  integration_type       = "AWS_PROXY"
+  integration_uri        = aws_lambda_function.data_streaming_function.invoke_arn
+  integration_method     = "POST"
+  payload_format_version = "2.0"
+}
+
+## Integration for $default (handles custom actions)
+resource "aws_apigatewayv2_integration" "default_integration" {
+  api_id                 = aws_apigatewayv2_api.websocket_api.id
+  integration_type       = "AWS_PROXY"
+  integration_uri        = aws_lambda_function.data_streaming_function.invoke_arn
+  integration_method     = "POST"
+  payload_format_version = "2.0"
 }

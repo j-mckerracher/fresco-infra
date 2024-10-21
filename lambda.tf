@@ -35,3 +35,12 @@ resource "aws_lambda_function" "data_streaming_function" {
     Name = "DataStreamingLambdaFunction"
   }
 }
+
+# Permission for API Gateway to invoke Lambda for WebSocket API
+resource "aws_lambda_permission" "apigw_websocket_permission" {
+  statement_id  = "AllowAPIGatewayInvokeWebSocket"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.data_streaming_function.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.websocket_api.execution_arn}/*"
+}
