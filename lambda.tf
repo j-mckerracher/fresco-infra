@@ -1,6 +1,6 @@
 resource "aws_lambda_function" "data_streaming_function" {
   function_name = "data_streaming_function"
-  handler       = "lambda_handler"
+  handler       = "server.lambda_handler"
   runtime       = "python3.12"
   role          = aws_iam_role.lambda_role.arn
   timeout       = 900
