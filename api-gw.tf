@@ -83,7 +83,7 @@ resource "aws_apigatewayv2_integration" "connect_integration" {
   integration_type       = "AWS_PROXY"
   integration_uri        = aws_lambda_function.data_streaming_function.invoke_arn
   integration_method     = "POST"
-  payload_format_version = "2.0"
+  payload_format_version = "1.0"
 }
 
 ## Integration for $disconnect
@@ -92,7 +92,7 @@ resource "aws_apigatewayv2_integration" "disconnect_integration" {
   integration_type       = "AWS_PROXY"
   integration_uri        = aws_lambda_function.data_streaming_function.invoke_arn
   integration_method     = "POST"
-  payload_format_version = "2.0"
+  payload_format_version = "1.0"
 }
 
 ## Integration for $default (handles custom actions)
@@ -101,5 +101,5 @@ resource "aws_apigatewayv2_integration" "default_integration" {
   integration_type       = "AWS_PROXY"
   integration_uri        = aws_lambda_function.data_streaming_function.invoke_arn
   integration_method     = "POST"
-  payload_format_version = "2.0"
+  payload_format_version = "1.0"
 }
