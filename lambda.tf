@@ -1,13 +1,13 @@
+# Update the Lambda function to use the Docker image
 resource "aws_lambda_function" "data_streaming_function" {
   function_name = "data_streaming_function"
-  handler       = "server.lambda_handler"
-  runtime       = "python3.12"
+  package_type  = "Image"
   role          = aws_iam_role.lambda_role.arn
   timeout       = 900
-  memory_size   = 1024  # Increased memory to support multithreading
+  memory_size   = 1024  # Adjust based on your needs
 
-  filename         = "server.zip"
-  source_code_hash = filebase64sha256("server.zip")
+  # Image URI from ECR
+  image_uri = "${aws_ecr_repository.lambda_repository.repository_url}:latest"
 
   # Environment variables for the Lambda function
   environment {
@@ -37,11 +37,12 @@ resource "aws_lambda_function" "data_streaming_function" {
   }
 }
 
-# Permission for API Gateway to invoke Lambda for WebSocket API
-resource "aws_lambda_permission" "apigw_websocket_permission" {
-  statement_id  = "AllowAPIGatewayInvokeWebSocket"
-  action        = "lambda:InvokeFunction"
+# Ensure Lambda has permission to access ECR
+data "aws_ecr_authorization_token" "ecr_token" {}
+
+resource "aws_lambda_permission" "ecr_access" {
+  statement_id  = "AllowLambdaECRAccess"
+  action        = "lambda:GetImage"
   function_name = aws_lambda_function.data_streaming_function.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.websocket_api.execution_arn}/*"
+  principal     = "*"
 }
