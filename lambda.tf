@@ -4,6 +4,7 @@ resource "aws_lambda_function" "data_streaming_function" {
   runtime       = "python3.12"
   role          = aws_iam_role.lambda_role.arn
   timeout       = 900
+  memory_size   = 1024  # Increased memory to support multithreading
 
   filename         = "server.zip"
   source_code_hash = filebase64sha256("server.zip")
