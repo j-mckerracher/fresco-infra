@@ -1,13 +1,14 @@
 # Update the Lambda function to use the Docker image
 resource "aws_lambda_function" "data_streaming_function" {
   function_name = "data_streaming_function"
-  package_type  = "Image"
+  handler       = "server.lambda_handler"
+  runtime       = "python3.12"
   role          = aws_iam_role.lambda_role.arn
   timeout       = 900
-  memory_size   = 1024  # Adjust based on your needs
+  memory_size   = 1024  # Increased memory to support multithreading
 
-  # Image URI from ECR
-  image_uri = "${aws_ecr_repository.lambda_repository.repository_url}:latest"
+  filename         = "server.zip"
+  source_code_hash = filebase64sha256("server.zip")
 
   # Environment variables for the Lambda function
   environment {
