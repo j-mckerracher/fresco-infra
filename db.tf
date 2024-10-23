@@ -20,6 +20,16 @@ resource "aws_db_parameter_group" "postgresql" {
   }
 }
 
+resource "aws_security_group_rule" "allow_postgres_access" {
+  type        = "ingress"
+  from_port   = 5432
+  to_port     = 5432
+  protocol    = "tcp"
+  cidr_blocks = ["${var.allowed_ip}/32"]
+  security_group_id = aws_security_group.db_sg.id
+}
+
+
 # Create a KMS key for RDS encryption
 resource "aws_kms_key" "rds" {
   description             = "KMS key for RDS encryption"

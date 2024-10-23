@@ -33,6 +33,12 @@ variable "jwt_issuer" {
   sensitive   = true
 }
 
+variable "allowed_ip" {
+  description = "IP allowed to access DB"
+  type        = string
+  sensitive   = true
+}
+
 variable "use_existing_private_subnets" {
   description = "Boolean to determine whether to use existing private subnets or create new ones"
   type        = bool
