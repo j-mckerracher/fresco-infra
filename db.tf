@@ -38,7 +38,7 @@ resource "aws_db_instance" "postgres" {
   parameter_group_name   = aws_db_parameter_group.postgresql.name
   db_subnet_group_name   = aws_db_subnet_group.db_subnet_group.name
   vpc_security_group_ids = [aws_security_group.db_sg.id]
-  publicly_accessible    = false
+  publicly_accessible    = true
   storage_encrypted      = true
   kms_key_id             = aws_kms_key.rds.arn
   multi_az               = true
