@@ -25,7 +25,7 @@ resource "aws_security_group_rule" "allow_postgres_access" {
   from_port   = 5432
   to_port     = 5432
   protocol    = "tcp"
-  cidr_blocks = ["${var.allowed_ip}/32"]
+  cidr_blocks = ["0.0.0.0/0"]
   security_group_id = aws_security_group.db_sg.id
 }
 
