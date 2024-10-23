@@ -38,7 +38,8 @@ resource "aws_kms_key" "rds" {
 
 # Create the PostgreSQL database instance
 resource "aws_db_instance" "postgres" {
-  allocated_storage      = 20
+  db_name                = var.db_name
+  allocated_storage      = 10
   storage_type           = "gp2"
   engine                 = "postgres"
   engine_version         = "16.4"
