@@ -25,15 +25,6 @@ resource "aws_apigatewayv2_stage" "http_stage" {
   auto_deploy = true
 }
 
-# Permission for API Gateway to invoke Lambda
-resource "aws_lambda_permission" "apigw_http_permission" {
-  statement_id  = "AllowAPIGatewayInvoke"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.data_streaming_function.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.http_api.execution_arn}/*"
-}
-
 # Create the WebSocket API
 resource "aws_apigatewayv2_api" "websocket_api" {
   name                       = "data_streaming_websocket_api"
