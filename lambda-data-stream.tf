@@ -3,10 +3,10 @@ resource "aws_lambda_function" "data_streaming_function" {
   package_type  = "Image"
   role          = aws_iam_role.lambda_role.arn
   timeout       = 900
-  memory_size   = 1024  # Adjust based on your needs
+  memory_size   = 1024
 
   # Image URI from ECR
-  image_uri = "${aws_ecr_repository.lambda_repository.repository_url}:latest"
+  image_uri = "${aws_ecr_repository.lambda_repository.repository_url}:data-streaming"
 
   # Environment variables for the Lambda function
   environment {
