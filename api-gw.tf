@@ -26,13 +26,6 @@ resource "aws_apigatewayv2_route" "ws_url_route" {
   target    = "integrations/${aws_apigatewayv2_integration.http_integration.id}"
 }
 
-# Deployment Stage for HTTP API
-resource "aws_apigatewayv2_stage" "http_stage" {
-  api_id      = aws_apigatewayv2_api.http_api.id
-  name        = "prod"
-  auto_deploy = true
-}
-
 # Create the WebSocket API
 resource "aws_apigatewayv2_api" "websocket_api" {
   name                       = "data_streaming_websocket_api"
