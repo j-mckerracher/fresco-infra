@@ -9,12 +9,20 @@ resource "aws_apigatewayv2_integration" "http_integration" {
   api_id           = aws_apigatewayv2_api.http_api.id
   integration_type = "AWS_PROXY"
   integration_uri  = aws_lambda_function.data_streaming_function.invoke_arn
+  payload_format_version = "2.0"
 }
 
 # Route for GET /data
 resource "aws_apigatewayv2_route" "http_route" {
   api_id    = aws_apigatewayv2_api.http_api.id
   route_key = "GET /data"
+  target    = "integrations/${aws_apigatewayv2_integration.http_integration.id}"
+}
+
+# Route for GET /ws-url
+resource "aws_apigatewayv2_route" "ws_url_route" {
+  api_id    = aws_apigatewayv2_api.http_api.id
+  route_key = "GET /ws-url"
   target    = "integrations/${aws_apigatewayv2_integration.http_integration.id}"
 }
 
@@ -29,9 +37,8 @@ resource "aws_apigatewayv2_stage" "http_stage" {
 resource "aws_apigatewayv2_api" "websocket_api" {
   name                       = "data_streaming_websocket_api"
   protocol_type              = "WEBSOCKET"
-  route_selection_expression = format("$%s", "request.body.action")
+  route_selection_expression = "$request.body.action"
 }
-
 
 # Routes for $connect, $disconnect, and $default
 ## $connect Route
@@ -58,7 +65,6 @@ resource "aws_apigatewayv2_route" "default_route" {
   api_key_required = false
 }
 
-
 # Deployment Stage for WebSocket API
 resource "aws_apigatewayv2_stage" "websocket_stage" {
   api_id      = aws_apigatewayv2_api.websocket_api.id
@@ -66,8 +72,7 @@ resource "aws_apigatewayv2_stage" "websocket_stage" {
   auto_deploy = true
 }
 
-
-# Create Integrations for Routes
+# Create Integrations for WebSocket Routes
 ## Integration for $connect
 resource "aws_apigatewayv2_integration" "connect_integration" {
   api_id                 = aws_apigatewayv2_api.websocket_api.id
