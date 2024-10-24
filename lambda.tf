@@ -1,4 +1,3 @@
-# Update the Lambda function to use the Docker image
 resource "aws_lambda_function" "data_streaming_function" {
   function_name = "data_streaming_function"
   package_type  = "Image"
@@ -23,6 +22,7 @@ resource "aws_lambda_function" "data_streaming_function" {
       JWT_SECRET       = var.jwt_secret
       JWT_ISSUER       = var.jwt_issuer
       CHUNK_SIZE       = "10000"
+      DYNAMODB_TABLE   = aws_dynamodb_table.websocket_connections.name  # New Environment Variable
     }
   }
 

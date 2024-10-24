@@ -1,3 +1,5 @@
+# iam.tf (Updated)
+
 # IAM Role for Lambda Function
 resource "aws_iam_role" "lambda_role" {
   name = "lambda_execution_role"
@@ -14,7 +16,7 @@ resource "aws_iam_role" "lambda_role" {
   })
 }
 
-# IAM Policy for Lambda to access ECR, API Gateway, VPC, and Logs
+# IAM Policy for Lambda to access ECR, API Gateway, VPC, Logs, and DynamoDB
 data "aws_iam_policy_document" "lambda_policy" {
   # Permissions for ECR access
   statement {
@@ -37,7 +39,7 @@ data "aws_iam_policy_document" "lambda_policy" {
     ]
 
     resources = [
-      "${aws_ecr_repository.lambda_repository.arn}",
+      aws_ecr_repository.lambda_repository.arn,
       "${aws_ecr_repository.lambda_repository.arn}/*"
     ]
   }
@@ -92,6 +94,23 @@ data "aws_iam_policy_document" "lambda_policy" {
 
     resources = [
       "arn:aws:execute-api:${var.aws_region}:${data.aws_caller_identity.current.account_id}:${aws_apigatewayv2_api.websocket_api.id}/*"
+    ]
+  }
+
+  # Permissions for DynamoDB Access
+  statement {
+    sid = "AllowDynamoDBAccess"
+
+    actions = [
+      "dynamodb:PutItem",
+      "dynamodb:DeleteItem",
+      "dynamodb:Scan",
+      "dynamodb:Query"
+    ]
+
+    resources = [
+      aws_dynamodb_table.websocket_connections.arn,
+      "${aws_dynamodb_table.websocket_connections.arn}/index/ClientIdIndex"
     ]
   }
 }
