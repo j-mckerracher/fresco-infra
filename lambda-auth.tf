@@ -2,7 +2,6 @@ resource "aws_lambda_function" "auth_function" {
   function_name = "auth_function"
   package_type  = "Image"
   handler       = "auth-lambda.lambda_handler"
-  runtime       = "python3.12"
   role          = aws_iam_role.lambda_role.arn
   timeout       = 30
   memory_size   = 128
